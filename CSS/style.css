@@ -30,6 +30,9 @@ header{
     text-align: center;
     margin: 2%;
 }
+main{
+  height: 100vh;
+}
 main #contenedor-inicio{
   background-color: #3f27e1;
 }
