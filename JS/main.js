@@ -1,100 +1,166 @@
 const cards = document.querySelectorAll('.card');
+let seHaDadoVuelta = false;
+let bloquearTablero = false;
+let primeraCarta, segundaCarta;
+let emparejar = false;
+let timerInterval;
+let seconds = 0;
 
-let hasFlippedCard = false;
-let lockBoard = false;
-let firstCard, secondCard;
-let matching = false;
+function voltearCarta() {
+  if (bloquearTablero || emparejar) return;
+  if (this === primeraCarta) return;
+  if (this.classList.contains('found')) return;
 
-function flipCard() {
-  if (lockBoard || matching) return;
-  if (this === firstCard) return;
-  if (this.classList.contains('found')) return; // Esto es una verificación
+  startTimer();
 
   this.classList.add('flipped');
 
-  if (!hasFlippedCard) {
-    hasFlippedCard = true;
-    firstCard = this;
+  if (!seHaDadoVuelta) {
+    seHaDadoVuelta = true;
+    primeraCarta = this;
     return;
   }
 
-  secondCard = this;
-  checkForMatch();
-  hasFlippedCard = false; 
+  segundaCarta = this;
+  hayCoincidencia();
+  seHaDadoVuelta = false;
 }
 
-function checkForMatch() {
-  matching = true;
-  let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
-  isMatch ? disableCards() : unflipCards();
+function hayCoincidencia() {
+  emparejar = true;
+  let isMatch = primeraCarta.dataset.framework === segundaCarta.dataset.framework;
+  isMatch ? tarjetaDesactivada() : noVoltearCartas();
 }
 
-function disableCards() {
-  firstCard.removeEventListener('click', flipCard);
-  secondCard.removeEventListener('click', flipCard);
+function tarjetaDesactivada() {
+  primeraCarta.removeEventListener('click', voltearCarta);
+  segundaCarta.removeEventListener('click', voltearCarta);
 
-  // Se agrega una clase a las tarjetas encontradas para mantenerlas boca arriba
-  firstCard.classList.add('found');
-  secondCard.classList.add('found');
+  primeraCarta.classList.add('found');
+  segundaCarta.classList.add('found');
 
-  //Este es el mensaje que apareche al dar vuelta todas las cartas
-if (document.querySelectorAll('.card.found').length === cards.length) {
+  if (document.querySelectorAll('.card.found').length === cards.length) {
+    stopTimer();
+
     const message = document.createElement('h2');
     message.textContent = 'Has encontrado todas las cartas';
     message.classList.add('texto-final');
-  
+
     const finalMessage = document.createElement('div');
     finalMessage.setAttribute('id', 'final-message');
-  
+
     const image = document.createElement('img');
     image.src = './IMG/confeti.gif';
-  
+
     finalMessage.appendChild(message);
     finalMessage.appendChild(image);
-  
-    // Agregar el botón de reinicio
+
     const button = document.createElement('button');
-    button.classList.add('boton-reinicio')
+    button.classList.add('boton-reinicio');
     button.textContent = 'Reiniciar';
     button.setAttribute('id', 'reset-button');
     button.addEventListener('click', resetGame);
     finalMessage.appendChild(button);
-  
-    // Agregar el mensaje final y el botón al contenedor del juego
+
     document.getElementById('game-container').appendChild(finalMessage);
   }
-  
-  function resetGame() {
-    // Vuelve a cargar la página para reiniciar el juego
-    location.reload();
-  }
-  
-  matching = false;
+
+  emparejar = false;
 }
 
-function unflipCards() {
-  matching = true;
-  lockBoard = true;
+function noVoltearCartas() {
+  emparejar = true;
+  bloquearTablero = true;
 
   setTimeout(() => {
-    firstCard.classList.remove('flipped');
-    secondCard.classList.remove('flipped');
+    primeraCarta.classList.remove('flipped');
+    segundaCarta.classList.remove('flipped');
 
-    resetBoard();
-    matching = false;
+    resetearTablero();
+    emparejar = false;
   }, 1000);
 }
 
-function resetBoard() {
-  [hasFlippedCard, lockBoard] = [false, false];
-  [firstCard, secondCard] = [null, null];
+function resetearTablero() {
+  [seHaDadoVuelta, bloquearTablero] = [false, false];
+  [primeraCarta, segundaCarta] = [null, null];
 }
 
-(function shuffle() {
+function barajarCartas() {
   cards.forEach(card => {
     let randomPos = Math.floor(Math.random() * 12);
     card.style.order = randomPos;
   });
-})();
+}
 
-cards.forEach(card => card.addEventListener('click', flipCard));
+function startTimer() {
+  if (timerInterval) return;
+
+  timerInterval = setInterval(() => {
+    seconds++;
+    updateTimer();
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function updateTimer() {
+  const timerElement = document.getElementById('timer');
+  timerElement.textContent = secondsToTime(seconds);
+}
+
+function secondsToTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const secondsRemaining = seconds % 60;
+  return `${padNumber(minutes)}:${padNumber(secondsRemaining)}`;
+}
+
+function padNumber(number) {
+  return number.toString().padStart(2, '0');
+}
+
+function resetGame() {
+  stopTimer();
+
+  cards.forEach(card => {
+    card.classList.remove('flipped');
+    card.classList.remove('found');
+    card.addEventListener('click', voltearCarta);
+    mostrarCardsTemp()
+  });
+
+  const finalMessage = document.getElementById('final-message');
+  if (finalMessage) {
+    finalMessage.remove();
+  }
+
+  barajarCartas();
+  seconds = 0;
+  updateTimer();
+
+  setTimeout(() => {
+    cards.forEach(card => card.classList.remove('flipped'));
+    bloquearTablero = false;
+  }, 2000);
+}
+
+barajarCartas();
+mostrarCardsTemp();
+
+function mostrarCardsTemp() {
+  cards.forEach(card => {
+    card.classList.add('flipped');
+  });
+
+  setTimeout(() => {
+    cards.forEach(card => {
+      card.classList.remove('flipped');
+    });
+    bloquearTablero = false;
+  }, 3000);
+}
+
+cards.forEach(card => card.addEventListener('click', voltearCarta));
