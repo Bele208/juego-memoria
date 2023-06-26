@@ -53,8 +53,8 @@ main #contenedor-inicio{
 
   .card {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 115px;
+    height: 115px;
     margin: 10px;
     perspective: 1000px;
     cursor: pointer;
@@ -172,6 +172,7 @@ main #contenedor-inicio{
     border-radius: 5px;
   }
   .botones a:hover,  #volver:hover{
+    font-weight: bold;
     color: #000000;
     background-color: #d3c55a;
   }
@@ -195,6 +196,12 @@ main #contenedor-inicio{
     
   }
 
+  #texto-inicio{
+    text-align: center;
+    font-size: 1.5rem;
+    padding: 20px;
+  }
+
 
   /* MEDIA QUERIES */
 
@@ -210,6 +217,9 @@ main #contenedor-inicio{
     .card{
       width: 60px;
       height: 60px;
+    }
+    #texto-inicio{
+      font-size: 1.2rem;
     }
   }
 
