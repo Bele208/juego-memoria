@@ -218,9 +218,9 @@ main #contenedor-inicio{
       width: 60px;
       height: 60px;
     }
-    #texto-inicio{
+    /* #texto-inicio{
       font-size: 1.2rem;
-    }
+    } */
   }
 
   @media only screen and (max-height: 500px) and (min-width: 320px) {
